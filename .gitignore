@@ -1,0 +1,48 @@
+# Environment & Secrets
+.env
+.env.*        
+!*.env.sample
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pdb
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+*.manifest
+*.spec
+
+# Virtual Environments
+venv/
+.venv/
+env/
+ENV/
+*.virtualenv
+
+# Jupyter / Notebooks
+.ipynb_checkpoints/
+*.ipynb
+
+# VS Code / IDE settings
+.vscode/
+.idea/
+*.iml
+
+# Logs & Misc
+*.log
+*.pot
+*.mo
+*.swp
+.DS_Store
+Thumbs.db
+
+# Chainlit
+.chainlit/
+
+# Pyenv
+.python-version
