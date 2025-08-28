@@ -22,14 +22,12 @@ rag = RAGChain(
 @cl.on_chat_start
 async def start():
     await cl.Message(
-        "Dermatology bot ready. Ask MBBS-style questions; I’ll cite (Book — Source)."
+        "Dermatology bot ready. Ask MBBS-style questions."
     ).send()
 
 @cl.on_message
 async def on_msg(msg: cl.Message):
     q = (msg.content or "").strip()
-    if not q:
-        return
     reply = cl.Message(content="")
     await reply.send()
     try:

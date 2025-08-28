@@ -64,15 +64,6 @@ class RAGChain:
             total += len(line)
         return "\n".join(formatted) if formatted else "(no relevant passages found)"
 
-    def answer(self, question, k=4):
-        context = self._format_context(self.retrieve(question, k))
-        messages = [
-            SystemMessage(content=SYSTEM_PROMPT),
-            HumanMessage(content=f"Question: {question}\n\nContext:\n{context}\n\nAnswer:")
-        ]
-        resp = self.llm.invoke(messages)
-        return resp.content
-
     def stream_answer(self, question, k=4):
         context = self._format_context(self.retrieve(question, k))
         messages = [
