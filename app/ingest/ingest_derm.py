@@ -1,21 +1,27 @@
 import os
 from pathlib import Path
 from dotenv import load_dotenv
-
-from langchain_openai import OpenAIEmbeddings
+from openai import OpenAI
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import (
     PyPDFLoader, TextLoader, UnstructuredFileLoader,
 )
-
 from app.config import (
     PINECONE_INDEX, PINECONE_CLOUD, PINECONE_REGION,
     OPENAI_MODEL_EMBED, EMBED_DIM, NAMESPACE,
-    DATA_DIR, CHUNK_SIZE, CHUNK_OVERLAP,
+    DATA_DIR, CHUNK_SIZE, CHUNK_OVERLAP,OPENAI_API_KEY
 )
 from app.vectorstores.pinecone_store import PineconeStore
 
+# Load env BEFORE reading keys
 load_dotenv()
+
+if not OPENAI_API_KEY:
+            raise RuntimeError(
+                "Missing OPENAI_API_KEY. Please set it in your .env or environment."
+            )
+
+openai_client = OpenAI(api_key=OPENAI_API_KEY)
 
 DATA_DIR_PATH = Path(DATA_DIR)
 
@@ -33,16 +39,19 @@ def load_docs():
             docs.extend(UnstructuredFileLoader(str(fp)).load())
     return docs
 
+def get_embedding(text, model=OPENAI_MODEL_EMBED):
+    text = (text or "").replace("\n", " ")
+    return openai_client.embeddings.create(input=[text], model=model).data[0].embedding
+
 def main():
     if not DATA_DIR_PATH.exists():
         raise SystemExit(f"Put your source files in ./{DATA_DIR} first.")
 
-    print("Loading documents...")
+    print("Loading documents")
     raw_docs = load_docs()
     if not raw_docs:
         raise SystemExit(f"No documents found in ./{DATA_DIR}")
 
-    print("Chunking...")
     splitter = RecursiveCharacterTextSplitter(
         chunk_size=CHUNK_SIZE,
         chunk_overlap=CHUNK_OVERLAP,
@@ -56,25 +65,29 @@ def main():
         src = os.path.basename(str(src)) if src else "unknown"
         c.metadata = {"source": src, "book": "Oxford Handbook of Dermatology"}
 
-    print("Setting up embeddings + Pinecone...")
-    embeddings = OpenAIEmbeddings(model=OPENAI_MODEL_EMBED)
+    texts = [c.page_content or "" for c in chunks]
+    metadatas = [c.metadata or {} for c in chunks]
 
+    print("Embedding with openAI")
+    vectors = [get_embedding(t) for t in texts]
+    ids = [f"{md.get('source','unknown')}::{i}" for i, md in enumerate(metadatas)]
+
+    print("Setting up Pinecone")
     store = PineconeStore(
         index_name=PINECONE_INDEX,
-        embeddings=embeddings,
         namespace=NAMESPACE,
         dimension=EMBED_DIM,
-        cloud=PINECONE_CLOUD,
-        region=PINECONE_REGION,
+        cloud=PINECONE_CLOUD,     
+        region=PINECONE_REGION,   
+        metric="cosine",
     )
 
-    print("Upserting to Pinecone...")
-    store.upsert_documents(chunks)
+    print("Upserting to Pinecone")
+    store.upsert_vectors(ids=ids, vectors=vectors, metadatas=metadatas, batch_size=256)
 
     stats = store.describe_stats()
     print("Index stats:", stats)
     print(f"Done. Indexed {len(chunks)} chunks into '{PINECONE_INDEX}'.")
 
 if __name__ == "__main__":
-    # Allow running as a script (python -m app.ingest.ingest_derm)
     main()

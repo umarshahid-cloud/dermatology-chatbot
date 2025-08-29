@@ -4,6 +4,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Pinecone / OpenAI
+PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 PINECONE_INDEX  = os.getenv("PINECONE_INDEX", "derma-chatbot")
 PINECONE_CLOUD  = os.getenv("PINECONE_CLOUD", "aws")
 PINECONE_REGION = os.getenv("PINECONE_REGION", "us-east-1")
@@ -15,6 +17,6 @@ EMBED_DIM = 1536  # text-embedding-3-small
 
 # Namespacing & data
 NAMESPACE     = "dermatology"
-DATA_DIR      = "data"       # put PDFs/TXT/MD here
+DATA_DIR      = "data"       
 CHUNK_SIZE    = int(os.getenv("CHUNK_SIZE", "800"))
 CHUNK_OVERLAP = int(os.getenv("CHUNK_OVERLAP", "120"))
