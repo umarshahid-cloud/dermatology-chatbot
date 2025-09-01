@@ -67,3 +67,22 @@ class PineconeStore:
         except Exception:
             self._create_index()
             return self._index().describe_index_stats()
+
+    def query(self, vector, top_k=4, include_metadata=True, include_values=False):
+        try:
+            return self._index().query(
+                vector=vector,
+                top_k=top_k,
+                include_metadata=include_metadata,
+                include_values=include_values,
+                namespace=self.namespace,
+            )
+        except Exception:
+            self._create_index()
+            return self._index().query(
+                vector=vector,
+                top_k=top_k,
+                include_metadata=include_metadata,
+                include_values=include_values,
+                namespace=self.namespace,
+            )

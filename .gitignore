@@ -29,7 +29,6 @@ ENV/
 *.ipynb
 
 # VS Code / IDE settings
-.vscode/
 .idea/
 *.iml
 
