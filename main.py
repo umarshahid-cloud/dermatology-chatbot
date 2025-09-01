@@ -1,21 +1,15 @@
 import os
-import chainlit as cl
 from dotenv import load_dotenv
-from app.rag.rag_chain import RAGChain
-
 load_dotenv()
+from app.rag.rag_chain import RAGChain
+import chainlit as cl
 
-# Optional debugpy
-# if os.getenv("ENABLE_DEBUGPY", "0") == "1":
-#     import debugpy
-#     debugpy.listen(("localhost", 5678))
-#     print("🔧 debugpy waiting on 5678...")
 
 rag = RAGChain(temperature=0.0)
 
 @cl.on_chat_start
 async def start():
-    await cl.Message("Dermatology bot ready. Ask MBBS-style questions.").send()
+    await cl.Message("Hello How can I help you today?").send()
 
 @cl.on_message
 async def on_msg(msg: cl.Message):

@@ -44,7 +44,6 @@ class PineconeStore:
         if not (len(ids) == len(vectors) == len(metadatas)):
             raise ValueError("ids, vectors, metadatas must have equal length")
 
-        ids = [str(i) for i in ids]
         total = 0
         n = len(vectors)
 

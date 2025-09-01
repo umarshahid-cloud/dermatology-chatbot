@@ -51,8 +51,6 @@ class RAGChain:
         docs = []
         for match in matches:
             metadata = getattr(match, "metadata", None)
-            if metadata is None and isinstance(match, dict):
-                metadata = match.get("metadata", {})
             if metadata is None:
                 metadata = {}
 

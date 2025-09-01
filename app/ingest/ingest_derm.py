@@ -9,7 +9,7 @@ from langchain_community.document_loaders import (
 from app.config import (
     PINECONE_INDEX, PINECONE_CLOUD, PINECONE_REGION,
     OPENAI_MODEL_EMBED, EMBED_DIM, NAMESPACE,
-    DATA_DIR, CHUNK_SIZE, CHUNK_OVERLAP,OPENAI_API_KEY
+    DATA_DIR, CHUNK_SIZE, CHUNK_OVERLAP, OPENAI_API_KEY
 )
 from app.vectorstores.pinecone_store import PineconeStore
 
@@ -17,12 +17,9 @@ from app.vectorstores.pinecone_store import PineconeStore
 load_dotenv()
 
 if not OPENAI_API_KEY:
-            raise RuntimeError(
-                "Missing OPENAI_API_KEY. Please set it in your .env or environment."
-            )
+    raise RuntimeError("Missing OPENAI_API_KEY. Please set it in your .env or environment.")
 
 openai_client = OpenAI(api_key=OPENAI_API_KEY)
-
 DATA_DIR_PATH = Path(DATA_DIR)
 
 def load_docs():
@@ -41,7 +38,9 @@ def load_docs():
 
 def get_embedding(text, model=OPENAI_MODEL_EMBED):
     text = (text or "").replace("\n", " ")
-    return openai_client.embeddings.create(input=[text], model=model).data[0].embedding
+    return openai_client.embeddings.create(
+        input=[text], model=model
+    ).data[0].embedding
 
 def main():
     if not DATA_DIR_PATH.exists():
@@ -59,26 +58,28 @@ def main():
     )
     chunks = splitter.split_documents(raw_docs)
 
-    # Normalize metadata
-    for c in chunks:
-        src = c.metadata.get("source", "unknown")
-        src = os.path.basename(str(src)) if src else "unknown"
-        c.metadata = {"source": src, "book": "Oxford Handbook of Dermatology"}
+    print(f"Split into {len(chunks)} chunks")
 
-    texts = [c.page_content or "" for c in chunks]
-    metadatas = [c.metadata or {} for c in chunks]
+    print("Embedding with OpenAI")
+    vectors, ids, metadatas = [], [], []
 
-    print("Embedding with openAI")
-    vectors = [get_embedding(t) for t in texts]
-    ids = [f"{md.get('source','unknown')}::{i}" for i, md in enumerate(metadatas)]
+    for i, c in enumerate(chunks):
+        src = os.path.basename(str(c.metadata.get("source", "unknown"))) or "unknown"
+        ids.append(f"{src}::{i}")
+        metadatas.append({
+            "source": src,
+            "book": "Oxford Handbook of Dermatology",
+            "text": c.page_content    
+        })
+        vectors.append(get_embedding(c.page_content))
 
     print("Setting up Pinecone")
     store = PineconeStore(
         index_name=PINECONE_INDEX,
         namespace=NAMESPACE,
         dimension=EMBED_DIM,
-        cloud=PINECONE_CLOUD,     
-        region=PINECONE_REGION,   
+        cloud=PINECONE_CLOUD,
+        region=PINECONE_REGION,
         metric="cosine",
     )
 
