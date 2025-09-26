@@ -13,7 +13,6 @@ from app.config import (
 )
 from app.vectorstores.pinecone_store import PineconeStore
 
-# Load env BEFORE reading keys
 load_dotenv()
 
 if not OPENAI_API_KEY:
@@ -84,7 +83,7 @@ def main():
     )
 
     print("Upserting to Pinecone")
-    store.upsert_vectors(ids=ids, vectors=vectors, metadatas=metadatas, batch_size=256)
+    store.upsert_vectors(ids=ids, vectors=vectors, metadatas=metadatas, batch_size=50)
 
     stats = store.describe_stats()
     print("Index stats:", stats)

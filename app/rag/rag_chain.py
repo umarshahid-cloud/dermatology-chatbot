@@ -7,6 +7,7 @@ from app.config import (
     OPENAI_MODEL_CHAT,
     PINECONE_CLOUD,
     PINECONE_REGION,
+    EMBED_DIM,
 )
 from app.vectorstores.pinecone_store import PineconeStore
 
@@ -33,7 +34,7 @@ class RAGChain:
         namespace=NAMESPACE,
         cloud=PINECONE_CLOUD,
         region=PINECONE_REGION,
-        dimension=1536,
+        dimension=EMBED_DIM,
         metric="cosine",
         ):
 
