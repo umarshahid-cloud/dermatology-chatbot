@@ -1,0 +1,52 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Chainlit (watch)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "chainlit",
+      "args": ["run", "main.py", "-w"],
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "justMyCode": true,
+      "envFile": "${workspaceFolder}/.env"
+    },
+    {
+      "name": "Python: Debug RAG module",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "app.rag.rag_chain",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "justMyCode": true,
+      "envFile": "${workspaceFolder}/.env"
+    },
+    {
+      "name": "Python: Debug Ingest module",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "app.ingest.ingest_derm",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "justMyCode": true,
+      "envFile": "${workspaceFolder}/.env"
+    },
+    {
+      "name": "Python: Attach to debugpy",
+      "type": "debugpy",
+      "request": "attach",
+      "connect": {
+        "host": "localhost",
+        "port": 5678
+      },
+      "justMyCode": true
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Chainlit + Attach (debugpy)",
+      "configurations": ["Chainlit (watch)", "Python: Attach to debugpy"]
+    }
+  ]
+}
